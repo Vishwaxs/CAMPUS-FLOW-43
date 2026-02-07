@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { createEvent, getPlatformModules, getThemePresets } from '../api';
+import { createEvent, getPlatformModules, getThemePresets, generateTheme } from '../api';
 import { Palette, Puzzle, Save, Eye } from 'lucide-react';
 
 export default function CreateEvent() {
@@ -11,6 +11,18 @@ export default function CreateEvent() {
   const [themePresets, setThemePresets] = useState({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  // NEW: AI Theme Generation State (Additive Feature)
+  const [aiThemeAnswers, setAiThemeAnswers] = useState({
+    mood: '',
+    brightness: '',
+    colorFamily: '',
+    fontStyle: '',
+    intensity: ''
+  });
+  const [generatingTheme, setGeneratingTheme] = useState(false);
+  const [aiThemeError, setAiThemeError] = useState('');
+  // END NEW
 
   const [form, setForm] = useState({
     title: '',
@@ -62,6 +74,38 @@ export default function CreateEvent() {
     }
     setSaving(false);
   };
+
+  // NEW: AI Theme Generation Handler (Additive Feature)
+  const handleGenerateTheme = async () => {
+    setAiThemeError('');
+
+    // Validate all 5 answers are filled
+    const { mood, brightness, colorFamily, fontStyle, intensity } = aiThemeAnswers;
+    if (!mood || !brightness || !colorFamily || !fontStyle || !intensity) {
+      setAiThemeError('Please answer all 5 questions to generate a theme');
+      return;
+    }
+
+    setGeneratingTheme(true);
+    try {
+      const generatedTheme = await generateTheme(aiThemeAnswers);
+
+      // Add generated theme to themePresets as 'ai-generated'
+      setThemePresets(prev => ({
+        ...prev,
+        'ai-generated': generatedTheme
+      }));
+
+      // Select the generated theme
+      setForm(prev => ({ ...prev, selectedTheme: 'ai-generated' }));
+
+      setAiThemeError('');
+    } catch (e) {
+      setAiThemeError(e.message || 'Failed to generate theme. Please try again.');
+    }
+    setGeneratingTheme(false);
+  };
+  // END NEW
 
   const previewTheme = themePresets[form.selectedTheme] || {};
 
@@ -209,6 +253,129 @@ export default function CreateEvent() {
                     </button>
                   </div>
                 )}
+
+                {/* NEW: AI Theme Generation Section (Additive Feature) */}
+                <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--shell-border)' }}>
+                  <div style={{ textAlign: 'center', marginBottom: 12 }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--shell-text-dim)', textTransform: 'uppercase', letterSpacing: 1 }}>OR</span>
+                  </div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: 8, color: 'var(--shell-text-bright)' }}>Generate Custom Theme with AI</div>
+                  <p className="text-xs text-dim mb-3">Answer 5 questions and let AI create a unique theme for your event.</p>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {/* Question 1: Event Mood */}
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.75rem' }}>1. Event Mood</label>
+                      <select
+                        className="form-select"
+                        value={aiThemeAnswers.mood}
+                        onChange={e => setAiThemeAnswers({ ...aiThemeAnswers, mood: e.target.value })}
+                        style={{ fontSize: '0.8rem', padding: '6px 10px' }}
+                      >
+                        <option value="">Select mood...</option>
+                        <option value="Professional">Professional</option>
+                        <option value="Energetic">Energetic</option>
+                        <option value="Festive">Festive</option>
+                        <option value="Minimal">Minimal</option>
+                        <option value="Futuristic">Futuristic</option>
+                      </select>
+                    </div>
+
+                    {/* Question 2: Brightness */}
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.75rem' }}>2. Brightness Preference</label>
+                      <select
+                        className="form-select"
+                        value={aiThemeAnswers.brightness}
+                        onChange={e => setAiThemeAnswers({ ...aiThemeAnswers, brightness: e.target.value })}
+                        style={{ fontSize: '0.8rem', padding: '6px 10px' }}
+                      >
+                        <option value="">Select brightness...</option>
+                        <option value="Light">Light</option>
+                        <option value="Dark">Dark</option>
+                        <option value="Auto">Auto (AI decides)</option>
+                      </select>
+                    </div>
+
+                    {/* Question 3: Color Family */}
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.75rem' }}>3. Primary Color Family</label>
+                      <select
+                        className="form-select"
+                        value={aiThemeAnswers.colorFamily}
+                        onChange={e => setAiThemeAnswers({ ...aiThemeAnswers, colorFamily: e.target.value })}
+                        style={{ fontSize: '0.8rem', padding: '6px 10px' }}
+                      >
+                        <option value="">Select color...</option>
+                        <option value="Blue">Blue</option>
+                        <option value="Purple">Purple</option>
+                        <option value="Red">Red</option>
+                        <option value="Green">Green</option>
+                        <option value="Orange">Orange</option>
+                        <option value="Mixed">Mixed (AI decides)</option>
+                      </select>
+                    </div>
+
+                    {/* Question 4: Font Style */}
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.75rem' }}>4. Font Style</label>
+                      <select
+                        className="form-select"
+                        value={aiThemeAnswers.fontStyle}
+                        onChange={e => setAiThemeAnswers({ ...aiThemeAnswers, fontStyle: e.target.value })}
+                        style={{ fontSize: '0.8rem', padding: '6px 10px' }}
+                      >
+                        <option value="">Select font style...</option>
+                        <option value="Modern">Modern</option>
+                        <option value="Elegant">Elegant</option>
+                        <option value="Bold">Bold</option>
+                        <option value="Minimal">Minimal</option>
+                      </select>
+                    </div>
+
+                    {/* Question 5: Visual Intensity */}
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.75rem' }}>5. Visual Intensity</label>
+                      <select
+                        className="form-select"
+                        value={aiThemeAnswers.intensity}
+                        onChange={e => setAiThemeAnswers({ ...aiThemeAnswers, intensity: e.target.value })}
+                        style={{ fontSize: '0.8rem', padding: '6px 10px' }}
+                      >
+                        <option value="">Select intensity...</option>
+                        <option value="Subtle">Subtle</option>
+                        <option value="Balanced">Balanced</option>
+                        <option value="High Contrast">High Contrast</option>
+                      </select>
+                    </div>
+
+                    {/* Generate Button */}
+                    <button
+                      type="button"
+                      onClick={handleGenerateTheme}
+                      disabled={generatingTheme}
+                      className="btn btn-primary"
+                      style={{ marginTop: 8, fontSize: '0.8rem', padding: '8px 14px' }}
+                    >
+                      {generatingTheme ? 'Generating Theme...' : 'Generate Theme with AI'}
+                    </button>
+
+                    {/* Error Display */}
+                    {aiThemeError && (
+                      <div style={{ color: 'var(--shell-red)', fontSize: '0.75rem', marginTop: 4 }}>
+                        {aiThemeError}
+                      </div>
+                    )}
+
+                    {/* Success Message */}
+                    {form.selectedTheme === 'ai-generated' && !generatingTheme && !aiThemeError && (
+                      <div style={{ color: 'var(--shell-glow)', fontSize: '0.75rem', marginTop: 4 }}>
+                        ✓ AI theme generated and selected! Check the preview above.
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {/* END NEW */}
               </div>
             </div>
           </div>

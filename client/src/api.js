@@ -36,8 +36,12 @@ export const getEventRegistrations = (slug) => fetchApi(`/events/${slug}/registr
 export const createAnnouncement = (slug, data) => fetchApi(`/events/${slug}/announcements`, { method: 'POST', body: JSON.stringify(data) });
 export const createScheduleItem = (slug, data) => fetchApi(`/events/${slug}/schedule`, { method: 'POST', body: JSON.stringify(data) });
 
+// NEW: AI Theme Generation (Additive Feature)
+export const generateTheme = (answers) => fetchApi('/events/generate-theme', { method: 'POST', body: JSON.stringify(answers) });
+
 // Platform
 export const getPlatformModules = () => fetchApi('/platform/modules');
 export const getThemePresets = () => fetchApi('/platform/themes');
 export const getPlatformStats = () => fetchApi('/platform/stats');
 export const getRecommendations = (userId) => fetchApi(`/platform/recommendations/${userId}`);
+
