@@ -271,4 +271,34 @@ router.post('/:slug/schedule', (req, res) => {
   res.status(201).json({ id, event_id: event.id, title });
 });
 
+// ============================================================================
+// NEW: AI Theme Generation Endpoint (Additive Feature)
+// ============================================================================
+const { generateThemeFromAnswers } = require('../utils/gemini');
+
+// POST /api/events/generate-theme — Generate theme using Gemini AI
+router.post('/generate-theme', async (req, res) => {
+  const { mood, brightness, colorFamily, fontStyle, intensity } = req.body;
+
+  // Validate all 5 required answers
+  if (!mood || !brightness || !colorFamily || !fontStyle || !intensity) {
+    return res.status(400).json({ error: 'All 5 theme preferences are required' });
+  }
+
+  try {
+    const theme = await generateThemeFromAnswers({
+      mood,
+      brightness,
+      colorFamily,
+      fontStyle,
+      intensity
+    });
+    res.json(theme);
+  } catch (error) {
+    console.error('Theme generation failed:', error);
+    res.status(500).json({ error: error.message || 'Failed to generate theme' });
+  }
+});
+// ============================================================================
+
 module.exports = router;
