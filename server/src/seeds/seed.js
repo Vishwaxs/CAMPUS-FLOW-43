@@ -2,6 +2,15 @@ const { getDb } = require('../models/database');
 const { MODULES } = require('../config/modules');
 const { THEME_PRESETS } = require('../config/themes');
 const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
+
+function hashPassword(password) {
+  return crypto.createHash('sha256').update(password).digest('hex');
+}
+
+// All demo users use this password
+const DEMO_PASSWORD = 'pass123';
+const DEMO_HASH = hashPassword(DEMO_PASSWORD);
 
 function seed() {
   const db = getDb();
@@ -11,7 +20,7 @@ function seed() {
     DELETE FROM votes; DELETE FROM vote_polls; DELETE FROM schedule_items;
     DELETE FROM announcements; DELETE FROM event_roles; DELETE FROM team_members;
     DELETE FROM teams; DELETE FROM registrations; DELETE FROM participation_log;
-    DELETE FROM events; DELETE FROM users; DELETE FROM module_registry;
+    DELETE FROM events; DELETE FROM sessions; DELETE FROM users; DELETE FROM module_registry;
   `);
 
   // 1. Seed module registry
@@ -26,9 +35,10 @@ function seed() {
 
   // 2. Seed users
   console.log('[SEED] Creating users...');
+  console.log(`  [INFO] All demo accounts use password: "${DEMO_PASSWORD}"`);
   const insertUser = db.prepare(`
-    INSERT INTO users (id, email, name, role, department, year, interests, engagement_score)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO users (id, email, password_hash, name, role, department, year, interests, engagement_score)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const users = {
@@ -43,7 +53,7 @@ function seed() {
   };
 
   for (const u of Object.values(users)) {
-    insertUser.run(u.id, u.email, u.name, u.role, u.department, u.year, u.interests, u.score);
+    insertUser.run(u.id, u.email, DEMO_HASH, u.name, u.role, u.department, u.year, u.interests, u.score);
   }
 
   // 3. Seed events
