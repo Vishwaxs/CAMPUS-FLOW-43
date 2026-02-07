@@ -1,4 +1,4 @@
-import { Routes, Route, NavLink, useLocation, Navigate } from 'react-router-dom';
+import { Routes, Route, NavLink, Link, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { Monitor, Calendar, LayoutDashboard, Archive, PlusCircle, Zap, BarChart3, LogOut } from 'lucide-react';
 import StudentDashboard from './pages/StudentDashboard';
@@ -57,10 +57,10 @@ export default function App() {
       <div className="app-layout">
         {/* Sidebar */}
         <aside className="sidebar">
-          <div className="sidebar-logo">
+          <Link to="/" className="sidebar-logo">
             <h1>CAMPUS<br />FLOW</h1>
             <div className="subtitle">Campus as a Platform</div>
-          </div>
+          </Link>
 
           <nav className="sidebar-nav">
             <div className="nav-section">Student</div>
