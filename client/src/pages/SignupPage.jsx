@@ -71,7 +71,7 @@ export default function SignupPage() {
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <h1 style={{
             fontFamily: 'var(--font-pixel)', fontSize: '0.8rem', color: 'var(--shell-glow)',
-            letterSpacing: 3, textShadow: '0 0 14px rgba(0,255,65,0.5)', lineHeight: 2
+            letterSpacing: 3, textShadow: '0 0 14px rgba(229,9,20,0.7)', lineHeight: 2
           }}>
             CAMPUS FLOW
           </h1>
@@ -176,7 +176,7 @@ export default function SignupPage() {
                         onClick={() => toggleInterest(interest)}
                         style={{
                           padding: '4px 10px', fontSize: '0.7rem', cursor: 'pointer',
-                          background: selected ? 'rgba(0,255,65,0.12)' : 'transparent',
+                          background: selected ? 'rgba(229,9,20,0.12)' : 'transparent',
                           border: `1px solid ${selected ? 'var(--shell-glow)' : 'var(--shell-border)'}`,
                           borderRadius: '2px', fontFamily: 'var(--font-mono)',
                           color: selected ? 'var(--shell-glow)' : 'var(--shell-text-dim)',

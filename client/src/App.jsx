@@ -20,7 +20,7 @@ export default function App() {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', flexDirection: 'column', gap: 16 }}>
         <div className="crt-overlay" />
-        <div style={{ fontFamily: 'var(--font-pixel)', color: 'var(--shell-glow)', fontSize: '0.7rem', textShadow: '0 0 10px rgba(0,255,65,0.5)' }}>
+        <div style={{ fontFamily: 'var(--font-pixel)', color: 'var(--shell-glow)', fontSize: '0.7rem', textShadow: '0 0 10px rgba(229,9,20,0.7)' }}>
           CAMPUS FLOW
         </div>
         <div style={{ color: 'var(--shell-text-dim)', fontSize: '0.8rem' }}>Initializing system...</div>

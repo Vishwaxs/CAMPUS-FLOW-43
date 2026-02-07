@@ -33,7 +33,7 @@ export default function LoginPage() {
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <h1 style={{
             fontFamily: 'var(--font-pixel)', fontSize: '0.8rem', color: 'var(--shell-glow)',
-            letterSpacing: 3, textShadow: '0 0 14px rgba(0,255,65,0.5)', lineHeight: 2
+            letterSpacing: 3, textShadow: '0 0 14px rgba(229,9,20,0.7)', lineHeight: 2
           }}>
             CAMPUS FLOW
           </h1>
