@@ -4,6 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { authMiddleware } = require('./middleware/auth');
+const authRouter = require('./routes/auth');
 const usersRouter = require('./routes/users');
 const eventsRouter = require('./routes/events');
 const platformRouter = require('./routes/platform');
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use(authMiddleware);
 
 // Routes
+app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/events', eventsRouter);
 app.use('/api/platform', platformRouter);

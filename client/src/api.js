@@ -1,10 +1,14 @@
 const API_BASE = '/api';
 
+function getToken() {
+  return localStorage.getItem('campus_flow_token');
+}
+
 async function fetchApi(path, options = {}) {
-  const userId = localStorage.getItem('campus_flow_user_id');
+  const token = getToken();
   const headers = {
     'Content-Type': 'application/json',
-    ...(userId ? { 'x-user-id': userId } : {}),
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     ...options.headers
   };
 
@@ -15,6 +19,12 @@ async function fetchApi(path, options = {}) {
   }
   return res.json();
 }
+
+// Auth
+export const signup = (data) => fetchApi('/auth/signup', { method: 'POST', body: JSON.stringify(data) });
+export const login = (data) => fetchApi('/auth/login', { method: 'POST', body: JSON.stringify(data) });
+export const logout = () => fetchApi('/auth/logout', { method: 'POST' });
+export const getMe = () => fetchApi('/auth/me');
 
 // Users
 export const getUsers = () => fetchApi('/users');
