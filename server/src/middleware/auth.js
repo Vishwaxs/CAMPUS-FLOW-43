@@ -1,25 +1,29 @@
-const { v4: uuidv4 } = require('uuid');
+const { getDb } = require('../models/database');
 
-// Simulated auth middleware. In production, this would validate JWT tokens.
-// For the hackathon MVP, we use a simple user-id header to switch personas.
+// Token-based auth middleware — looks up Bearer token in sessions table
 function authMiddleware(req, res, next) {
-  const userId = req.headers['x-user-id'];
-  if (!userId) {
-    // Default to first student for demo convenience
+  const authHeader = req.headers['authorization'];
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     req.user = null;
     return next();
   }
 
-  const { getDb } = require('../models/database');
+  const token = authHeader.slice(7);
   const db = getDb();
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+  const session = db.prepare(`
+    SELECT u.* FROM sessions s
+    JOIN users u ON u.id = s.user_id
+    WHERE s.token = ?
+  `).get(token);
 
-  if (!user) {
-    return res.status(401).json({ error: 'User not found' });
+  if (!session) {
+    req.user = null;
+    return next();
   }
 
-  user.interests = JSON.parse(user.interests || '[]');
-  req.user = user;
+  session.interests = JSON.parse(session.interests || '[]');
+  delete session.password_hash;
+  req.user = session;
   next();
 }
 

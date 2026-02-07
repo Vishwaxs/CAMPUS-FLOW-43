@@ -1,38 +1,52 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { getUsers } from '../api';
+import { getMe, login as apiLogin, signup as apiSignup, logout as apiLogout } from '../api';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // On mount, check if we have a saved token and validate it
   useEffect(() => {
-    getUsers().then(data => {
-      setUsers(data);
-      // Restore saved user or default to first student
-      const savedId = localStorage.getItem('campus_flow_user_id');
-      const saved = data.find(u => u.id === savedId);
-      const defaultUser = saved || data.find(u => u.role === 'student') || data[0];
-      if (defaultUser) {
-        setCurrentUser(defaultUser);
-        localStorage.setItem('campus_flow_user_id', defaultUser.id);
-      }
+    const token = localStorage.getItem('campus_flow_token');
+    if (!token) {
       setLoading(false);
-    }).catch(() => setLoading(false));
+      return;
+    }
+    getMe()
+      .then(user => {
+        setCurrentUser(user);
+        setLoading(false);
+      })
+      .catch(() => {
+        localStorage.removeItem('campus_flow_token');
+        setLoading(false);
+      });
   }, []);
 
-  const switchUser = (userId) => {
-    const user = users.find(u => u.id === userId);
-    if (user) {
-      setCurrentUser(user);
-      localStorage.setItem('campus_flow_user_id', user.id);
-    }
+  const login = async (email, password) => {
+    const { token, user } = await apiLogin({ email, password });
+    localStorage.setItem('campus_flow_token', token);
+    setCurrentUser(user);
+    return user;
+  };
+
+  const signup = async (data) => {
+    const { token, user } = await apiSignup(data);
+    localStorage.setItem('campus_flow_token', token);
+    setCurrentUser(user);
+    return user;
+  };
+
+  const logout = async () => {
+    try { await apiLogout(); } catch {}
+    localStorage.removeItem('campus_flow_token');
+    setCurrentUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ users, currentUser, switchUser, loading }}>
+    <AuthContext.Provider value={{ currentUser, login, signup, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
